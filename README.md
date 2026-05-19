@@ -1,5 +1,5 @@
 # Autoencoder Comparison on EMNIST-Balanced
-A comparative study of three autoencoder architectures — two fully connected (ANN-based) and two convolutional (CNN-based) — trained on the EMNIST Balanced dataset for unsupervised character representation learning.
+A comparative study of four autoencoder architectures — two fully connected (ANN-based) and two convolutional (CNN-based) — trained on the EMNIST Balanced dataset for unsupervised character representation learning.
  
 ## 📁 Project Structure
 ```
