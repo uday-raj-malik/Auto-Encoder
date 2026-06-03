@@ -1,84 +1,156 @@
-# CNN Autoencoder for EMNIST
+# Autoencoder Models: ANN vs CNN
 
-This project explores the use of Autoencoders, specifically Convolutional Neural Networks (CNNs), to reconstruct images from the EMNIST dataset. We compare simple and deeper CNN architectures to evaluate their performance in compressing and reconstructing handwritten characters.
+## Overview
 
-## Dataset
+This project implements and compares multiple Autoencoder architectures
+using PyTorch for image reconstruction tasks. The objective is to learn
+compressed latent representations of input images and reconstruct them
+with minimum reconstruction error.
 
-We use the EMNIST (Extended MNIST) Balanced dataset, which includes both letters and digits:
--   **Training Set**: 112,800 images
--   **Test Set**: 18,800 images
--   **Image Size**: 28x28 pixels (grayscale)
+Three implementations are included:
 
-## Models
+-   ANN Autoencoder Model 1
+-   ANN Autoencoder Model 2 (Deeper Architecture)
+-   CNN Autoencoder Models
 
-We trained two CNN-based autoencoder models to compare their reconstruction capabilities:
+------------------------------------------------------------------------
 
-### Model 1: Simple CNN Autoencoder
-A straightforward architecture to establish a baseline.
+## Tech Stack
 
-**Encoder:**
--   `Conv2d(1, 16, kernel_size=3, padding=1)`
--   `ReLU`
--   `MaxPool2d(2, 2)`
--   `Conv2d(16, 32, kernel_size=3, padding=1)`
--   `ReLU`
--   `MaxPool2d(2, 2)`
--   `Conv2d(32, 64, kernel_size=3, padding=1)` (Bottleneck)
--   `ReLU`
+-   Python
+-   PyTorch
+-   NumPy
+-   Pandas
+-   Matplotlib
+-   Scikit-learn
 
-**Decoder:**
--   `ConvTranspose2d(64, 32, kernel_size=2, stride=2)`
--   `ReLU`
--   `ConvTranspose2d(32, 16, kernel_size=2, stride=2)`
--   `ReLU`
--   `Conv2d(16, 1, kernel_size=3, padding=1)`
--   `Sigmoid`
+------------------------------------------------------------------------
 
-**Total Parameters:** 33,729
+## Model Architectures
 
-### Model 2: Deeper CNN Autoencoder with Batch Normalization
-A more complex model with additional layers and batch normalization to improve training stability and reconstruction quality.
+### 1. ANN Autoencoder 1
 
-**Encoder:**
--   `Conv2d(1, 32, kernel_size=3, padding=1)`
--   `BatchNorm2d(32)`
--   `ReLU`
--   `MaxPool2d(2, 2)`
--   `Conv2d(32, 64, kernel_size=3, padding=1)`
--   `BatchNorm2d(64)`
--   `ReLU`
--   `MaxPool2d(2, 2)`
--   `Conv2d(64, 128, kernel_size=3, padding=1)` (Bottleneck)
--   `BatchNorm2d(128)`
--   `ReLU`
+A fully connected neural network based autoencoder.
 
-**Decoder:**
--   `ConvTranspose2d(128, 64, kernel_size=2, stride=2)`
--   `BatchNorm2d(64)`
--   `ReLU`
--   `ConvTranspose2d(64, 32, kernel_size=2, stride=2)`
--   `BatchNorm2d(32)`
--   `ReLU`
--   `Conv2d(32, 1, kernel_size=3, padding=1)`
--   `Sigmoid`
+### Architecture
 
-**Total Parameters:** 134,657
+Encoder:
+
+784 → 256 → 128 → 64
+
+Decoder:
+
+64 → 128 → 256 → 784
+
+### Final Loss
+
+  Metric            Loss
+  ----------------- --------
+  Training Loss     0.0086
+  Validation Loss   0.0083
+
+------------------------------------------------------------------------
+
+## 2. ANN Autoencoder 2
+
+A deeper ANN based autoencoder with a smaller bottleneck representation.
+
+### Architecture
+
+Encoder:
+
+784 → 512 → 256 → 128 → 64 → 32
+
+Decoder:
+
+32 → 64 → 128 → 256 → 512 → 784
+
+### Final Loss
+
+  Metric            Loss
+  ----------------- --------
+  Training Loss     0.0203
+  Validation Loss   0.0200
+
+------------------------------------------------------------------------
+
+## 3. CNN Autoencoder
+
+Convolutional autoencoders were implemented to better preserve spatial
+image features.
+
+### CNN Model 1
+
+Uses convolution, pooling and transpose convolution layers.
+
+### Final Loss
+
+  Metric            Loss
+  ----------------- ----------
+  Training Loss     0.001033
+  Validation Loss   0.000988
+
+------------------------------------------------------------------------
+
+### CNN Model 2 (Deeper + Batch Normalization)
+
+An improved CNN autoencoder with deeper feature extraction and Batch
+Normalization.
+
+### Final Loss
+
+  Metric            Loss
+  ----------------- ----------
+  Training Loss     0.000313
+  Validation Loss   0.000349
+
+------------------------------------------------------------------------
+
+## Model Comparison
+
+  Model               Final Validation Loss
+  ------------------- -----------------------
+  ANN Autoencoder 1   0.0083
+  ANN Autoencoder 2   0.0200
+  CNN Autoencoder 1   0.000988
+  CNN Autoencoder 2   0.000349
+
+The CNN Autoencoder 2 achieved the best reconstruction performance with
+the lowest validation loss.
+
+------------------------------------------------------------------------
 
 ## Results
 
-Both models were trained using the Adam optimizer and Mean Squared Error (MSE) loss. The deeper architecture with batch normalization demonstrated significantly better reconstruction quality.
+-   ANN models successfully learned compressed image representations.
+-   CNN models performed significantly better due to their ability to
+    capture spatial features.
+-   The best performing model achieved a validation reconstruction loss
+    of **0.000349**.
 
-| Model | Epochs | Final Training Loss | Final Validation Loss |
-| :--- | :---: | :---: | :---: |
-| **Model 1 (Simple CNN)** | 10 | 0.001033 | 0.000988 |
-| **Model 2 (Deeper + BatchNorm)** | 8 | 0.000313 | 0.000349 |
+------------------------------------------------------------------------
 
-The deeper model (Model 2) is the superior model based on the lower validation loss.
+## How to Run
 
-## Usage
+1.  Install dependencies:
 
-The project is structured within Jupyter Notebooks. To run the code:
+``` bash
+pip install torch numpy pandas matplotlib scikit-learn
+```
 
-1.  Ensure you have the required libraries installed (`numpy`, `pandas`, `matplotlib`, `torch`, `sklearn`).
-2.  Download the `emnist-balanced-train.csv`, `emnist-balanced-test.csv`, and `emnist-balanced-mapping.txt` files and place them in the project directory.
-3.  Execute the cells in the notebook `cnn.ipynb` to train the models and visualize the results.
+2.  Open the notebooks:
+
+-   ann_1.ipynb
+-   ann_2.ipynb
+-   cnn.ipynb
+
+3.  Run all cells to train and evaluate the models.
+
+------------------------------------------------------------------------
+
+## Future Improvements
+
+-   Add denoising autoencoder functionality
+-   Experiment with different latent dimensions
+-   Add visualization of reconstructed outputs
+-   Try Variational Autoencoders (VAE)
