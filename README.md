@@ -1,107 +1,84 @@
-# Autoencoder Comparison on EMNIST-Balanced
-A comparative study of four autoencoder architectures — two fully connected (ANN-based) and two convolutional (CNN-based) — trained on the EMNIST Balanced dataset for unsupervised character representation learning.
- 
-## 📁 Project Structure
-```
-├── ann_1.ipynb       # Shallow ANN Autoencoder (bottleneck: 64)
-├── ann_2.ipynb       # Deep ANN Autoencoder (bottleneck: 32)
-└── cnn.ipynb         # CNN Autoencoders — AE_CNN_1 and AE_CNN_2
-```
- 
-## 📊 Dataset
-**EMNIST Balanced** — an extension of MNIST containing handwritten digits and uppercase/lowercase letters.
-- Input: 28×28 grayscale images (flattened to 784 for ANN, kept as 2D for CNN)
-- Classes: 47 balanced classes
-- Preprocessing: pixel normalization to [0, 1], rotation fix (90° clockwise + horizontal flip)
-Download the dataset from: [EMNIST Official Page](https://www.nist.gov/itl/products-and-services/emnist-dataset)
- 
-Place these files in the project root before running:
-```
-emnist-balanced-train.csv
-emnist-balanced-test.csv
-emnist-balanced-mapping.txt
-```
- 
-## 🧠 Model Architectures
- 
-### ANN Autoencoder 1 (`ann_1.ipynb`)
-Shallow fully-connected autoencoder.
- 
-| Layer | Size |
-|------------|----------------------------------|
-| Encoder | 784 → 256 → 128 → **64** |
-| Decoder | 64 → 128 → 256 → 784 |
-| Activation | ReLU (encoder), Sigmoid (output) |
-| Batch Size | 64 |
-| Bottleneck | 64 |
- 
-### ANN Autoencoder 2 (`ann_2.ipynb`)
-Deeper fully-connected autoencoder with a tighter bottleneck.
- 
-| Layer | Size |
-|------------|--------------------------------------|
-| Encoder | 784 → 512 → 256 → 128 → 64 → **32** |
-| Decoder | 32 → 64 → 128 → 256 → 512 → 784 |
-| Activation | ReLU (encoder), Sigmoid (output) |
-| Batch Size | 32 |
-| Bottleneck | 32 |
- 
-### CNN Autoencoder 1 — `AE_CNN_1` (`cnn.ipynb`)
-Simple convolutional autoencoder without batch normalization.
- 
-| Stage | Operation | Output Shape |
-|---------|---------------------------|---------------|
-| Encoder | Conv(1→16) + MaxPool | 16 × 14 × 14 |
-| | Conv(16→32) + MaxPool | 32 × 7 × 7 |
-| | Conv(32→64) ← bottleneck | 64 × 7 × 7 |
-| Decoder | ConvTranspose(64→32) | 32 × 14 × 14 |
-| | ConvTranspose(32→16) | 16 × 28 × 28 |
-| | Conv(16→1) + Sigmoid | 1 × 28 × 28 |
- 
-### CNN Autoencoder 2 — `AE_CNN_2` (`cnn.ipynb`)
-Deeper CNN autoencoder with BatchNorm for stable training.
- 
-| Stage | Operation | Output Shape |
-|---------|--------------------------------|---------------|
-| Encoder | Conv(1→32) + BN + MaxPool | 32 × 14 × 14 |
-| | Conv(32→64) + BN + MaxPool | 64 × 7 × 7 |
-| | Conv(64→128) + BN ← bottleneck | 128 × 7 × 7 |
-| Decoder | ConvTranspose(128→64) + BN | 64 × 14 × 14 |
-| | ConvTranspose(64→32) + BN | 32 × 28 × 28 |
-| | Conv(32→1) + Sigmoid | 1 × 28 × 28 |
- 
-## ⚙️ Training Setup
- 
-| Hyperparameter | ANN-1 | ANN-2 | CNN-1 & CNN-2 |
-|----------------|---------|---------|----------------|
-| Loss | MSELoss | MSELoss | MSELoss |
-| Optimizer | Adam | Adam | Adam |
-| Learning Rate | 0.001 | 0.001 | 0.001 |
-| Epochs | 5 | 5 | 10 |
-| Batch Size | 64 | 32 | 64 |
- 
-## 📈 Evaluation & Visualizations
-Each notebook includes:
-- **Reconstruction quality** — original vs reconstructed image grids
-- **Validation loss curve** across epochs
-- **PCA plot** of the latent space (full test set)
-- **t-SNE plot** of the latent space (5,000-sample subset, perplexity=30)
-## 🛠️ Requirements
-```bash
-pip install torch torchvision numpy pandas matplotlib scikit-learn
-```
- 
-## 🚀 Usage
-Open any notebook in Jupyter and run all cells in order:
-```bash
-jupyter notebook ann_1.ipynb
-jupyter notebook ann_2.ipynb
-jupyter notebook cnn.ipynb
-```
-Ensure the EMNIST CSV files are in the same directory as the notebooks.
- 
-## 📌 Key Observations
-- ANN autoencoders flatten spatial structure; CNN autoencoders preserve it via convolutional layers.
-- The deeper ANN (ann_2) uses a tighter bottleneck (32-dim) vs ann_1 (64-dim).
-- AE_CNN_2 adds BatchNorm to each layer for more stable training over 10 epochs.
-- Latent space visualizations (PCA / t-SNE) reveal how well each architecture clusters character classes.
+# CNN Autoencoder for EMNIST
+
+This project explores the use of Autoencoders, specifically Convolutional Neural Networks (CNNs), to reconstruct images from the EMNIST dataset. We compare simple and deeper CNN architectures to evaluate their performance in compressing and reconstructing handwritten characters.
+
+## Dataset
+
+We use the EMNIST (Extended MNIST) Balanced dataset, which includes both letters and digits:
+-   **Training Set**: 112,800 images
+-   **Test Set**: 18,800 images
+-   **Image Size**: 28x28 pixels (grayscale)
+
+## Models
+
+We trained two CNN-based autoencoder models to compare their reconstruction capabilities:
+
+### Model 1: Simple CNN Autoencoder
+A straightforward architecture to establish a baseline.
+
+**Encoder:**
+-   `Conv2d(1, 16, kernel_size=3, padding=1)`
+-   `ReLU`
+-   `MaxPool2d(2, 2)`
+-   `Conv2d(16, 32, kernel_size=3, padding=1)`
+-   `ReLU`
+-   `MaxPool2d(2, 2)`
+-   `Conv2d(32, 64, kernel_size=3, padding=1)` (Bottleneck)
+-   `ReLU`
+
+**Decoder:**
+-   `ConvTranspose2d(64, 32, kernel_size=2, stride=2)`
+-   `ReLU`
+-   `ConvTranspose2d(32, 16, kernel_size=2, stride=2)`
+-   `ReLU`
+-   `Conv2d(16, 1, kernel_size=3, padding=1)`
+-   `Sigmoid`
+
+**Total Parameters:** 33,729
+
+### Model 2: Deeper CNN Autoencoder with Batch Normalization
+A more complex model with additional layers and batch normalization to improve training stability and reconstruction quality.
+
+**Encoder:**
+-   `Conv2d(1, 32, kernel_size=3, padding=1)`
+-   `BatchNorm2d(32)`
+-   `ReLU`
+-   `MaxPool2d(2, 2)`
+-   `Conv2d(32, 64, kernel_size=3, padding=1)`
+-   `BatchNorm2d(64)`
+-   `ReLU`
+-   `MaxPool2d(2, 2)`
+-   `Conv2d(64, 128, kernel_size=3, padding=1)` (Bottleneck)
+-   `BatchNorm2d(128)`
+-   `ReLU`
+
+**Decoder:**
+-   `ConvTranspose2d(128, 64, kernel_size=2, stride=2)`
+-   `BatchNorm2d(64)`
+-   `ReLU`
+-   `ConvTranspose2d(64, 32, kernel_size=2, stride=2)`
+-   `BatchNorm2d(32)`
+-   `ReLU`
+-   `Conv2d(32, 1, kernel_size=3, padding=1)`
+-   `Sigmoid`
+
+**Total Parameters:** 134,657
+
+## Results
+
+Both models were trained using the Adam optimizer and Mean Squared Error (MSE) loss. The deeper architecture with batch normalization demonstrated significantly better reconstruction quality.
+
+| Model | Epochs | Final Training Loss | Final Validation Loss |
+| :--- | :---: | :---: | :---: |
+| **Model 1 (Simple CNN)** | 10 | 0.001033 | 0.000988 |
+| **Model 2 (Deeper + BatchNorm)** | 8 | 0.000313 | 0.000349 |
+
+The deeper model (Model 2) is the superior model based on the lower validation loss.
+
+## Usage
+
+The project is structured within Jupyter Notebooks. To run the code:
+
+1.  Ensure you have the required libraries installed (`numpy`, `pandas`, `matplotlib`, `torch`, `sklearn`).
+2.  Download the `emnist-balanced-train.csv`, `emnist-balanced-test.csv`, and `emnist-balanced-mapping.txt` files and place them in the project directory.
+3.  Execute the cells in the notebook `cnn.ipynb` to train the models and visualize the results.
